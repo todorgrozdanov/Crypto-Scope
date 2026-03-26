@@ -1,0 +1,4 @@
+frontend -> https://dasclient.z1.web.core.windows.net
+backend1 -> https://das-backend-8080.azurewebsites.net
+backend2 -> https://das-backend-8081.azurewebsites.net
+flask_py -> https://das-flask-5001.azurewebsites.net

@@ -1,0 +1,9 @@
+# Python environments
+venv/
+.venv/
+
+# JetBrains/IntelliJ/WebStorm/PyCharm
+.idea/
+
+# Node
+node_modules/

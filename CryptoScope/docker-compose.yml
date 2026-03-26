@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  backend1:
+    build: ./backend-spring
+    container_name: spring-backend-8080
+    ports:
+      - "8080:8080" # port 8080
+    networks:
+      - app-network
+
+  backend2:
+    build: ./crypto-data-service
+    container_name: spring-backend-8081
+    ports:
+      - "8081:8081" # port 8081
+    networks:
+      - app-network
+
+  flask-server:
+    build: ./flask-server
+    container_name: flask-app
+    ports:
+      - "5001:5001" # port 5001
+    networks:
+      - app-network
+
+  frontend:
+    build: ./frontend
+    container_name: vite-frontend
+    ports:
+      - "5173:5173" # port 5173
+    depends_on:
+      - backend1
+      - backend2
+      - flask-server
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+
+# Docker Compose file for multi-service application
