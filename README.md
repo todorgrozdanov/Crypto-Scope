@@ -1,93 +1,185 @@
-# das_proekt
+# Crypto-Scope
 
+**A full stack cryptocurrency analytics application combining interactive market dashboards, technical indicators, news sentiment, and machine learning experiments.**
 
+Crypto-Scope brings market exploration and historical analysis into one interface. Users can compare cryptocurrencies, inspect price charts, select technical indicators, and request experimental price and movement predictions.
+
+The project connects a **React and TypeScript** frontend to **Spring Boot REST APIs**, **PostgreSQL**, and a **Python/Flask machine learning service**.
+
+## Features
+
+### Market overview
+- Sort cryptocurrencies by price, market capitalization, trading volume, and percentage changes.
+- Compare daily, weekly, and monthly price changes.
+- Open individual cryptocurrency detail pages.
+- Browse recent news with sentiment information.
+
+### Interactive analysis
+- Explore historical OHLCV data through candlestick charts.
+- Switch between available time ranges, from one week to the full stored history.
+- Select technical indicators, including moving averages, Bollinger Bands, RSI, MACD, Stochastic, ADX, and CCI.
+- View loading states while market data and predictions are requested.
+
+### Machine learning
+- **LSTM:** generates experimental closing-price forecasts from historical OHLCV sequences.
+- **XGBoost:** provides a price-movement classification endpoint using price, sentiment, and available on-chain features.
+- **Data preparation:** notebooks support market-data collection and sentiment/on-chain processing.
+
+Prediction availability depends on database contents and model readiness. These features are educational experiments; no trading performance or prediction accuracy is claimed.
+
+## Technology stack
+
+| Area | Technologies |
+| --- | --- |
+| Frontend | React, TypeScript, Vite, Tailwind CSS, React Router, Axios |
+| Visualization | ApexCharts, Chart.js |
+| Backend | Java 17, Spring Boot, Spring Data JPA, PostgreSQL |
+| Machine learning | Python, Flask, TensorFlow/Keras, XGBoost, scikit-learn |
+| Data processing | pandas, NumPy, psycopg2, Jupyter notebooks |
+| Development and deployment | Maven, Docker, Docker Compose, Azure deployment configuration |
+
+## Architecture
+
+| Component | Responsibility | Local port |
+| --- | --- | --- |
+| `frontend` | Market dashboard, charts, news, and prediction views | `5173` |
+| `backend-spring` | Frontend-facing API, crypto-data gateway, sentiment, and prediction coordination | `8080` |
+| `crypto-data-service` | Cryptocurrency data API | `8081` |
+| `flask-server` | LSTM and XGBoost endpoints | `5001` |
+| PostgreSQL | Market history, cryptocurrency metadata, sentiment, and related data | Configured separately |
+
+The frontend calls the main Spring Boot API. Crypto-data requests are forwarded to the second Spring service, while prediction requests are coordinated with Flask. The Java and Python services use PostgreSQL-backed data.
+
+## Repository structure
+
+| Path | Contents |
+| --- | --- |
+| `CryptoScope/frontend/` | React and TypeScript application |
+| `CryptoScope/backend-spring/` | Main Spring Boot API |
+| `CryptoScope/crypto-data-service/` | Cryptocurrency data service |
+| `CryptoScope/flask-server/` | Flask endpoints, ML code, model artifacts, and notebooks |
+| `CryptoScope/docker-compose.yml` | Four-service development configuration |
+| `CryptoScope/azure_links.txt` | Deployment addresses recorded for the project |
 
 ## Getting started
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+### Requirements
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+- Git
+- Docker with Docker Compose for the container workflow
+- A PostgreSQL database populated with compatible project data
+- For running individual services: Java 17, Python 3.11, and a Node.js version compatible with Vite 7 (Node.js 22.12+ recommended)
 
-## Add your files
+### 1. Clone the repository
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
-
-```
-cd existing_repo
-git remote add origin https://gitlab.finki.ukim.mk/das_proekt/das_proekt.git
-git branch -M main
-git push -uf origin main
+```bash
+git clone https://github.com/todorgrozdanov/Crypto-Scope.git
+cd Crypto-Scope/CryptoScope
 ```
 
-## Integrate with your tools
+### 2. Configure database access and service addresses
 
-- [ ] [Set up project integrations](https://gitlab.finki.ukim.mk/das_proekt/das_proekt/-/settings/integrations)
+The checked-in configuration targets an Azure deployment and an externally hosted database. **Local setup requires configuration changes before startup.**
 
-## Collaborate with your team
+- Set PostgreSQL connection details in both Spring services' `src/main/resources/application.properties` files.
+- Set `DATABASE_URL` in `flask-server/lstm_service.py` and `flask-server/xgb_service.py` to your own development database connection.
+- Update frontend API addresses in `frontend/src/api.ts`, `frontend/src/pages/Home.tsx`, and `frontend/src/pages/Crypto.tsx` to use your intended backend.
+- Update service URLs in `CryptoGatewayController.java` and the predictor implementations under `backend-spring/.../services/predictors/`.
+- Review CORS configuration and controller-level origins to allow the frontend origin you use.
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+For local browser requests, the main API address is `http://localhost:8080`. For requests between Compose containers, use service names such as `http://backend2:8081` and `http://flask-server:5001` instead of `localhost`.
 
-## Test and Deploy
+Use your own credentials and keep them out of version control. Moving credentials and service addresses into environment-based configuration is recommended; simply creating an `.env` file does not replace values currently hardcoded in the source.
 
-Use the built-in continuous integration in GitLab.
+### 3. Prepare data
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+The Compose file does **not** create a PostgreSQL container or populate the database. Configure a separate database before starting the application.
 
-***
+The services expect compatible cryptocurrency and historical market data, including tables used for prices, sentiment, and on-chain information. The data service is configured with automatic schema generation disabled, so an empty database is insufficient.
 
-# Editing this README
+The notebooks in `flask-server/` provide data-processing workflows:
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+- `fetch.ipynb`
+- `sentiment_onchain.ipynb`
 
-## Suggestions for a good README
+Review their configuration and dependencies before execution. A complete automated database initialization and seed workflow is not currently included.
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+### 4. Start the services
 
-## Name
-Choose a self-explaining name for your project.
+After completing configuration and database preparation:
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+```bash
+docker compose up --build
+```
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+Open the frontend at [http://localhost:5173](http://localhost:5173).
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+The Flask health endpoint is [http://localhost:5001/health](http://localhost:5001/health).
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+To stop the services:
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+```bash
+docker compose down
+```
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+### Frontend development
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+From `CryptoScope/frontend/`:
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+```bash
+npm install
+npm run dev
+```
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+Additional commands:
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+```bash
+npm run build
+npm run lint
+npm run preview
+```
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+### Prediction model behavior
 
-## License
-For open source projects, say how it is licensed.
+The LSTM service uses a 30-observation lookback and requires sufficient historical data for the requested cryptocurrency. It loads the saved model and scaler when present; if either is missing, the prediction path attempts to train a model from database history.
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+Explicit LSTM training is also available through `POST /lstm/train`. Training can be resource-intensive and requires suitable data. The returned `confidence` field is a custom model metric, not a calibrated probability of forecast correctness.
+
+## API overview
+
+### Main Spring Boot API — port 8080
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/crypto` | List cryptocurrency market data |
+| `GET` | `/api/crypto/{coinGeckoId}` | Retrieve cryptocurrency details |
+| `GET` | `/api/crypto/{coinGeckoId}/ohlcv?timeframe=...` | Forward a historical-data request |
+| `GET` | `/api/sentiment` | Retrieve news and sentiment data |
+| `GET` | `/api/prediction/{coinGeckoId}/lstm/predict?days=7` | Request an LSTM forecast |
+| `GET` | `/api/prediction/{coinGeckoId}/xgb/predict` | Request a movement prediction |
+
+### Flask service — port 5001
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `GET` | `/health` | Service health check |
+| `GET` | `/lstm/health` | LSTM route health check |
+| `GET` | `/lstm/predict/{crypto_id}?days=7` | Forecast using an internal numeric cryptocurrency ID |
+| `POST` | `/lstm/train` | Train the global LSTM model |
+| `GET` | `/xgb/predict/{crypto_id}` | Classify price movement |
+
+The Java API accepts CoinGecko identifiers, while the Flask prediction endpoints accept internal numeric database IDs.
+
+## Deployment and current limitations
+
+Azure service addresses are recorded in [`CryptoScope/azure_links.txt`](CryptoScope/azure_links.txt). Deployment availability may change; those addresses are not a guarantee of an active demo.
+
+- Local deployment currently needs manual URL, database, and CORS configuration.
+- An automated database bootstrap and seed process is not included.
+- Charts and predictions depend on the availability and completeness of stored data.
+- ML outputs are experimental and should not be interpreted as validated investment signals.
+- The current frontend container runs the Vite development server, and Flask starts in debug mode; these settings should be changed for production hosting.
+
+## Contributors
+
+This repository contains a collaborative project. See the [GitHub contributors](https://github.com/todorgrozdanov/Crypto-Scope/graphs/contributors) and commit history for recorded contributions.
